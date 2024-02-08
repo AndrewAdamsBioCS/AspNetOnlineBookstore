@@ -1,0 +1,86 @@
+﻿@model BookDisplayModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!--<div class="container pt-5">-->
+<div class="w-100 pt-4 pb-3 px-5 position-fixed z-3" style="background-color: #060606; margin-top: -3rem;">
+        <form asp-action="Index" class="row w-75 mx-5 row-cols-auto g-3 align-items-center">
+
+        <div class="col">
+        <label class="visually-hidden" for="genreId">Genres</label>
+        <select class="form-select" id="genreId" name="genreId">
+            <option selected>All books...</option>
+            @foreach(var genre in Model.Genres)
+            {
+                <option selected="@(genre.Id == Model.GenreId)" value="@genre.Id">@genre.GenreName</option>
+            }
+        </select>
+        </div>
+
+        <div class="col">
+            <label class="visually-hidden" for="searchTerm">Search by title</label>
+            <div class="input-group">
+                <div class="input-group-text"></div>
+                <input type="text" class="form-control" value="@Model.SearchTerm" id="searchTerm" name="searchTerm" placeholder="Search by title">
+            </div>
+        </div>
+
+        <div class="col">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="/Home/Index" class="btn btn-dark">Reset</a>
+        </div>
+        </form>
+    </div>
+
+    <div class="w-100 mt-5 pt-5 d-flex flex-wrap">
+        @foreach (var book in Model.Books){
+            <div class="card mx-3 mb-4" style="width: 16rem;">
+
+                <img src="https://picsum.photos/id/@(50+book.Id)/32/40" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">@book.BookName</h5>
+                    <p class="card-text">                    
+                        Author: @book.AuthorName<br>
+                        Genre: @book.GenreName<br>
+                        Price: $@book.Price<br>
+                    </p>
+
+                    <div class="">
+                        <label for="qty">Qty:</label>
+                        <select id="book-@book.Id-qty" name="qty">
+                            @{
+                                for(var i=1; i<=10; i++){
+                                    <option value="@i">@i</option>
+                                }
+                            }
+                        </select>
+                        <button type="button" onclick="add(@book.Id)" class="btn btn-primary">Add to cart</button>
+                    </div>                
+                </div>
+            </div>
+        }
+    </div>
+<!--</div>-->
+
+@section Scripts{
+    <script>
+        async function add(bookId){
+            var qty = document.getElementById(`book-${bookId}-qty`);
+
+            try{
+                var response = await fetch(`/Cart/AddItem?bookId=${bookId}&quantity=${qty.value}`);
+                if(response.status == 200) {
+                    var result = await response.json();
+                    var cartCountElement = document.getElementById("cartItemCount");
+                    cartCountElement.innerHTML = result;
+
+                    // Reset book qty selection to 1
+                    qty.value = "1";
+                }
+            } catch(err) {
+                console.log(err);
+            }
+        }
+    </script>
+}

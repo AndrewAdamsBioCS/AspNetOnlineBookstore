@@ -1,0 +1,48 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Order Placed";
+}
+
+<div style="width:90%; margin:auto">
+    @if (Model != null && Model.OrderDetails != null && Model.OrderDetails.Count > 0)
+    {
+        <h3>Order Placed!</h3>
+        <p>Status: @Model.OrderStatus.StatusName</p>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderDetails)
+                {
+                    <tr>
+                        <td>
+                            <h5>@item.Book.BookName</h5>
+                            <span>@item.Book.AuthorName</span><br>
+                            <span>@item.Book.Genre.GenreName</span>
+                        </td>
+
+                        <td>$@item.Book.Price</td>
+                        <td>x @item.Quantity</td>
+                        <td>$@(item.Book.Price * item.Quantity)</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <h5>Order Total: </h5> $@(Model.OrderDetails.Select(item => item.Book.Price * item.Quantity).Sum())
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    }
+</div>

@@ -1,0 +1,94 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
+@model ShoppingCart
+@{
+    ViewData["Title"] = "GetUserCart";
+}
+
+<div style="width:90%; margin:auto" class="">
+    @if (Model != null && Model.CartDetails != null && Model.CartDetails.Count > 0)
+    {
+        <h3>My Cart</h3>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.CartDetails)
+            {
+                <tr>
+                    <td>
+                        <h5>@item.Book.BookName</h5>
+                        <span>@item.Book.AuthorName</span><br>
+                        <span>@item.Book.Genre.GenreName</span>
+                    </td>
+                    
+                    <td>$@item.Book.Price</td>
+                    <td>
+                        x <select id="book-@item.Book.Id-qty" name="qty" onchange="updateQty(@item.Book.Id, @item.Quantity, this.value)">
+                        @{
+                            for (var i = 1; i <= 10; i++)
+                            {
+                                <option selected="@(i == item.Quantity)" value="@i">@i</option>
+                            }
+                        }
+                        </select>
+                        <p style="padding-top: 1rem;"><a class="btn btn-info" href="/Cart/RemoveItem?bookId=@item.BookId&quantity=@item.Quantity">Remove</a></p>
+                    </td>
+                    <td>$@(item.Book.Price*item.Quantity)</td>
+                </tr>
+            }
+            </tbody>
+            <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><h5>Order Total: </h5> $@(Model.CartDetails.Select(item => item.Book.Price * item.Quantity).Sum())</td>
+            </tr>
+            </tfoot>
+        </table>
+
+
+
+        <div class="my-2" style="float:right;">
+            @if (SignInManager.IsSignedIn(User)) {
+                <a class="btn btn-primary" href="/Cart/CheckOut">Check Out</a>
+            }
+            else {
+                <a class="btn btn-primary" href="/Cart/CheckOut?redirect=1">Check Out</a>
+            }
+        </div>
+    }
+    else
+    {
+        <h5>Cart is empty</h5>
+    }
+</div>
+
+@section Scripts{
+    <script>
+    async function updateQty(bookId, oldQty, newQty){
+            try {
+                if(newQty > oldQty) {
+                    var toAdd = newQty - oldQty;
+                    window.location.href = `/Cart/AddItem?bookId=${bookId}&quantity=${toAdd}&redirect=1`;
+                } else if (newQty < oldQty) {
+                    var toRemove = oldQty - newQty;
+                    window.location.href = `/Cart/RemoveItem?bookId=${bookId}&quantity=${toRemove}`;
+                }
+            } catch (err) {
+                console.log(err);
+            }
+    }
+    </script>
+
+}
+
